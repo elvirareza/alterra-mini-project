@@ -81,9 +81,9 @@ jobs:
           username: ${{ secrets.EC2_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            docker stop elvirareza/springboot-mini-project-test
-            docker rmi elvirareza/springboot-mini-project:latest
+            docker stop springboot-mini-project springboot-mini-project-test
+            docker rmi elvirareza/springboot-mini-project:latest elvirareza/springboot-mini-project-test:latest
             docker pull elvirareza/springboot-mini-project:latest
             docker pull elvirareza/springboot-mini-project-test:latest
-            docker run -d --rm --name elvirareza/springboot-mini-project-test -p 8000:80 elvirareza/springboot-mini-project-test:latest
-            docker run -d --rm --name elvirareza/springboot-mini-project -p 80:8080 --env-file .dev.env --network kampus_merdeka elvirareza/springboot-mini-project:latest
+            docker run -d --rm --name springboot-mini-project-test -p 8000:80 elvirareza/springboot-mini-project-test:latest
+            docker run -d --rm --name springboot-mini-project -p 80:8080 --env-file .dev.env --network kampus_merdeka elvirareza/springboot-mini-project:latest
