@@ -81,10 +81,8 @@ jobs:
           username: ${{ secrets.EC2_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            docker stop elvirareza/springboot-mini-project
             docker stop elvirareza/springboot-mini-project-test
             docker rmi elvirareza/springboot-mini-project:latest
-            docker rmi elvirareza/springboot-mini-project-test:latest
             docker pull elvirareza/springboot-mini-project:latest
             docker pull elvirareza/springboot-mini-project-test:latest
             docker run -d --rm --name elvirareza/springboot-mini-project-test -p 8000:80 elvirareza/springboot-mini-project-test:latest
