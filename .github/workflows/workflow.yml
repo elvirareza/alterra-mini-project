@@ -54,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile
+          file: 'Dockerfile'
           push: true
           tags: elvirareza/springboot-mini-project:latest
   deployment:
@@ -71,7 +71,7 @@ jobs:
           port: 22
           username: ${{ secrets.EC2_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: ".dev.env"
+          source: '.dev.env'
           target: /home/${{ secrets.EC2_SSH_USERNAME }}
       - name: Deploy using ssh
         uses: appleboy/ssh-action@master
@@ -81,8 +81,10 @@ jobs:
           username: ${{ secrets.EC2_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            docker stop springboot-mini-project springboot-mini-project-test
-            docker rmi elvirareza/springboot-mini-project:latest elvirareza/springboot-mini-project-test:latest
+            docker stop springboot-mini-project 
+            docker stop springboot-mini-project-test
+            docker rmi elvirareza/springboot-mini-project:latest 
+            docker rmi elvirareza/springboot-mini-project-test:latest
             docker pull elvirareza/springboot-mini-project:latest
             docker pull elvirareza/springboot-mini-project-test:latest
             docker run -d --rm --name springboot-mini-project-test -p 8000:80 elvirareza/springboot-mini-project-test:latest
