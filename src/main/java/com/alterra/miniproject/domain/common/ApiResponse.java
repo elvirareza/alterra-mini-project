@@ -1,4 +1,4 @@
-package com.alterra.miniproject.domain.response;
+package com.alterra.miniproject.domain.common;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

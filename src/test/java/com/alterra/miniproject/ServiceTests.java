@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import com.alterra.miniproject.domain.common.ApiResponse;
 import com.alterra.miniproject.domain.model.HelloWorld;
-import com.alterra.miniproject.domain.response.ApiResponse;
 import com.alterra.miniproject.repository.HelloWorldRepository;
 import com.alterra.miniproject.service.HelloWorldService;
 

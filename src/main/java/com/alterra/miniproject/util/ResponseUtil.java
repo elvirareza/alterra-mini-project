@@ -2,7 +2,7 @@ package com.alterra.miniproject.util;
 
 import java.time.LocalDateTime;
 
-import com.alterra.miniproject.domain.response.ApiResponse;
+import com.alterra.miniproject.domain.common.ApiResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
