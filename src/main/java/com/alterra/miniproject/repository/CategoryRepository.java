@@ -1,6 +1,6 @@
 package com.alterra.miniproject.repository;
 
-import com.alterra.miniproject.domain.model.Category;
+import com.alterra.miniproject.domain.dto.Category;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package com.alterra.miniproject.domain.model;
+package com.alterra.miniproject.domain.dto;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

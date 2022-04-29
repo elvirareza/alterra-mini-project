@@ -1,10 +1,10 @@
-package com.alterra.miniproject.domain.model;
+package com.alterra.miniproject.domain.dto;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -18,19 +18,17 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
-@Table(name = "users")
+@Table(name = "payment")
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class User {
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
-    
-    private String password;
+    private String name;
 
-    @OneToMany(mappedBy = "user")
+    @OneToOne(mappedBy = "payment")
     private Expense expense;
 }
