@@ -1,4 +1,4 @@
-package com.alterra.miniproject.domain.dto;
+package com.alterra.miniproject.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
