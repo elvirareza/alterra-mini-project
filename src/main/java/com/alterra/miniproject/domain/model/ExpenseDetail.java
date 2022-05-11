@@ -34,5 +34,9 @@ public class ExpenseDetail {
 
     @ManyToOne
     @JoinColumn(name = "expense_id", referencedColumnName = "id")
-    private Expense detExpense;
+    private Expense expense;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private Category category;
 }

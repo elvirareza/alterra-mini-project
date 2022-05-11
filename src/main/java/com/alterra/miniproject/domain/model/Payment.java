@@ -1,10 +1,12 @@
 package com.alterra.miniproject.domain.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -27,8 +29,8 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String cardNumber;
 
-    @OneToOne(mappedBy = "payment")
-    private Expense expense;
+    @OneToMany(mappedBy = "payment")
+    private List<Expense> expense;
 }

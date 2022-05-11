@@ -10,8 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PreUpdate;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -40,22 +39,19 @@ public class Expense {
 
     private LocalDateTime expenseDate;
 
-    @OneToMany(mappedBy = "catExpense")
-    private List<Category> categories;
-
-    @OneToMany(mappedBy = "detExpense")
+    @OneToMany(mappedBy = "expense")
     private List<ExpenseDetail> detailExpense;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "payment_id", referencedColumnName = "id")
     private Payment payment;
 
-    @PreUpdate
+    @PrePersist
     void onCreate() {
-        this.expenseDate = LocalDateTime.now();
+        this.totalAmount = 0.0;
     }
 }

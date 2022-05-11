@@ -38,7 +38,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             if(token != null && !token.isBlank() && jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.getUsername(token);
         
-                log.info("username: {}", username);
+                log.info("Username: {}", username);
         
                 UserDetails user = userDetailsService.loadUserByUsername(username);
         

@@ -31,13 +31,10 @@ public class AuthService {
             user.setUsername(req.getUsername());
             user.setPassword(passwordEncoder.encode(req.getPassword()));
             userRepository.save(user);
-            
-            UsernamePassword usernamePassword = new UsernamePassword();
-            usernamePassword.setUsername(req.getUsername());
-            String password = "*".repeat(req.getPassword().length());
-            usernamePassword.setPassword(password);
 
-            return usernamePassword;
+            req.setPassword("*".repeat(req.getPassword().length()));
+
+            return req;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
