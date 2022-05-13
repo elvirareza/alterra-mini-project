@@ -8,8 +8,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +28,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@SQLDelete(sql = "UPDATE expense_detail SET deleted = true WHERE id=?")
+@Where(clause = "deleted = false")
 public class ExpenseDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,9 +41,15 @@ public class ExpenseDetail {
 
     @ManyToOne
     @JoinColumn(name = "expense_id", referencedColumnName = "id")
+    @JsonBackReference
     private Expense expense;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
+    @JsonBackReference
     private Category category;
+
+    @JsonIgnore
+    @Builder.Default
+    private Boolean deleted = Boolean.FALSE;
 }

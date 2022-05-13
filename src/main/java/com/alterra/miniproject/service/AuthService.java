@@ -27,13 +27,16 @@ public class AuthService {
 
     public UsernamePassword register(UsernamePassword req) {
         try {
+            if(userRepository.findByUsername(req.getUsername()) != null) 
+                throw new Exception("User " + req.getUsername() + " is already exist");
+            
             User user = new User();
             user.setUsername(req.getUsername());
             user.setPassword(passwordEncoder.encode(req.getPassword()));
             userRepository.save(user);
 
             req.setPassword("*".repeat(req.getPassword().length()));
-
+            log.info("User {} saved", req.getUsername());
             return req;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -53,7 +56,7 @@ public class AuthService {
 
             TokenResponse tokenResponse = new TokenResponse();
             tokenResponse.setToken(jwt);
-
+            log.info("Token created");
             return tokenResponse;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
