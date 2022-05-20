@@ -35,10 +35,10 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String username;
     
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     @OneToMany(mappedBy = "user")

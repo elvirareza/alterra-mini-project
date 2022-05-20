@@ -11,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 @NoArgsConstructor
 @Transactional
 public class PaymentService {
@@ -28,18 +26,11 @@ public class PaymentService {
     private ExpenseRepository expenseRepository;
 
     public List<Payment> getPayment() {
-        try {
-            List<Payment> payment = paymentRepository.findAll();
+        List<Payment> payment = paymentRepository.findAll();
 
-            if(payment == null) throw new Exception();
+        log.info("Get payments success");
 
-            log.info("Get payments success");
-
-            return payment;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        return payment;
     }
 
     public Payment getPayment(Long id) {
@@ -56,25 +47,18 @@ public class PaymentService {
     }
 
     public Payment postPayment(PaymentInput payment) {
-        try {
-            Payment pay = new Payment();
-            pay.setCardNumber(payment.getCardNumber());
-            log.info("Payment card: {}", pay.getCardNumber());
-            paymentRepository.save(pay);
-            log.info("Payment saved");
+        Payment pay = new Payment();
+        pay.setCardNumber(payment.getCardNumber());
+        log.info("Payment card: {}", pay.getCardNumber());
+        paymentRepository.save(pay);
+        log.info("Payment saved");
 
-            return pay; 
-        } catch (Exception e) {
-            log.error("Save payment error: {}", e.getMessage());
-            throw new RuntimeException(e.getMessage(), e);
-        }
+            return pay;
     }
 
     public Payment updatePayment(Long id, PaymentInput payment) {
         try {
-            Payment pay = getPayment(id);
-
-            if(payment.getCardNumber() != null) pay.setCardNumber(payment.getCardNumber());
+            Payment pay = paymentRepository.getById(id);
 
             log.info("Payment card: {}", pay.getCardNumber());
             paymentRepository.save(pay);

@@ -59,6 +59,7 @@ public class CategoryController {
     @PutMapping("/category/{id}")
     public ResponseEntity<?> putCategory(@PathVariable("id") Long id, @RequestBody CategoryInput req) {
         try {
+            categoryService.getCategory(id);
             Category category = categoryService.updateCategory(id, req);
             return ResponseUtil.build("Category updated", category, HttpStatus.OK);
         } catch (Exception e) {

@@ -17,13 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 @NoArgsConstructor
 @Transactional
 public class ExpenseDetailService {
@@ -40,19 +38,12 @@ public class ExpenseDetailService {
     private JwtTokenProvider jwtTokenProvider;
     
     public List<ExpenseDetail> getExpenseDetail(HttpServletRequest request) {
-        try {
-            String username = getUsername(request);
-            List<ExpenseDetail> expenseDetails = expenseDetailRepository.getExpenseDetailsByUsername(username);
+        String username = getUsername(request);
+        List<ExpenseDetail> expenseDetails = expenseDetailRepository.getExpenseDetailsByUsername(username);
 
-            if(expenseDetails == null) throw new Exception();
-
-            log.info("Get expense details success");
+        log.info("Get expense details success");
             
-            return expenseDetails;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        return expenseDetails;
     }
 
     public ExpenseDetail getExpenseDetail(HttpServletRequest request, Long id) {
@@ -77,8 +68,6 @@ public class ExpenseDetailService {
 
             Expense expense = expenseRepository.getExpenseByUsername(detailInput.getExpenseId(), getUsername(request))
                 .orElseThrow(() -> new Exception("Expense with id " + detailInput.getExpenseId() + " not found"));
-
-            if(expense == null) throw new Exception();
 
             exp.setExpense(expense);
 

@@ -57,8 +57,9 @@ public class PaymentController {
     }
 
     @PutMapping("/payment/{id}")
-    public ResponseEntity<?> postPayment (@PathVariable("id") Long id, @RequestBody PaymentInput req) {
+    public ResponseEntity<?> putPayment (@PathVariable("id") Long id, @RequestBody PaymentInput req) {
         try {
+            paymentService.getPayment(id);
             Payment payment = paymentService.updatePayment(id, req);
             return ResponseUtil.build("Payment updated", payment, HttpStatus.OK);
         } catch (Exception e) {           

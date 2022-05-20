@@ -11,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 @NoArgsConstructor
 @Transactional
 public class CategoryService {
@@ -28,18 +26,11 @@ public class CategoryService {
     private ExpenseDetailRepository expenseDetailRepository;
 
     public List<Category> getCategory() {
-        try {
-            List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAll();
 
-            if(categories == null) throw new Exception();
+        log.info("Get categories success");
 
-            log.info("Get categories success");
-
-            return categories;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        return categories;
     }
 
     public Category getCategory(Long id) {
@@ -56,36 +47,21 @@ public class CategoryService {
     }
 
     public Category postCategory(CategoryInput category) {
-        try {
-            Category cat = new Category();
-            cat.setName(category.getName());
+        Category cat = new Category();
+        cat.setName(category.getName());
 
-            if(cat.getName() == null) throw new Exception();
-
-            categoryRepository.save(cat);
-            log.info("Category posted");
-            return cat; 
-        } catch (Exception e) {
-            log.error("Post category error: {}", e.getMessage());
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        categoryRepository.save(cat);
+        log.info("Category posted");
+        return cat;
     }
 
     public Category updateCategory(Long id, CategoryInput category) {
-        try {
-            Category cat = getCategory(id);
-            
-            if(category.getName() != null) cat.setName(category.getName());
+        Category cat = categoryRepository.getById(id);
+        cat.setName(category.getName());
 
-            if(cat.getName() == null) throw new Exception();
-
-            categoryRepository.save(cat);
-            log.info("Category updated");
-            return cat; 
-        } catch (Exception e) {
-            log.error("Update category error: {}", e.getMessage());
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        categoryRepository.save(cat);
+        log.info("Category updated");
+        return cat; 
     }
 
     public void deleteCategory(Long id) {
