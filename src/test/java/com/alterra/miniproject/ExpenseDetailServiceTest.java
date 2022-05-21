@@ -148,51 +148,55 @@ public class ExpenseDetailServiceTest {
         });         
     }
 
-    // @Test
-    // void updateSuccess_Test() {
-    //     ExpenseDetailInput detailInput = EASY_RANDOM.nextObject(ExpenseDetailInput.class);
-    //     ExpenseDetail expenseDetail = EASY_RANDOM.nextObject(ExpenseDetail.class);
+    @Test
+    void updateSuccess_Test() {
+        ExpenseDetailInput detailInput = EASY_RANDOM.nextObject(ExpenseDetailInput.class);
+        ExpenseDetail expenseDetail = EASY_RANDOM.nextObject(ExpenseDetail.class);
 
-    //     doReturn(Optional.of(expenseDetail))
-    //         .when(expenseDetailRepository).getExpenseDetailByUsername(id, username);
+        expenseDetail.setId(id);
+
+        when(expenseDetailRepository.getExpenseDetailByUsername(id, username))
+            .thenReturn(Optional.of(expenseDetail));
              
-    //     expenseDetail.getExpense().getUser().setUsername(username);
+        expenseDetail.getExpense().getUser().setUsername(username);
 
-    //     Expense expense = new Expense();
+        Expense expense = EASY_RANDOM.nextObject(Expense.class);
 
-    //     doReturn(Optional.of(expense))
-    //         .when(expenseRepository).getExpenseByUsername(detailInput.getExpenseId(), username);
+        expense.getUser().setUsername(username);
 
-    //     expenseDetail.setExpense(expense);
+        when(expenseRepository.getExpenseByUsername(detailInput.getExpenseId(), username))
+            .thenReturn(Optional.of(expense));
 
-    //     Double totalAmount = 0.0;
+        expenseDetail.setExpense(expense);
 
-    //     doReturn(totalAmount)
-    //         .when(expenseRepository).getTotalAmount(detailInput.getExpenseId());
+        Double totalAmount = 0.0;
+
+        when(expenseRepository.getTotalAmount(detailInput.getExpenseId()))
+            .thenReturn(totalAmount);
         
-    //     totalAmount -= expenseDetail.getAmount();
+        totalAmount -= expenseDetail.getAmount();
 
-    //     totalAmount += detailInput.getAmount();
+        totalAmount += detailInput.getAmount();
         
-    //     expenseDetail.setAmount(detailInput.getAmount());
+        expenseDetail.setAmount(detailInput.getAmount());
 
-    //     doNothing()
-    //         .when(expenseRepository).updateTotalAmount(detailInput.getExpenseId(), totalAmount);
+        doNothing()
+            .when(expenseRepository).updateTotalAmount(detailInput.getExpenseId(), totalAmount);
 
-    //     Category category = new Category();
+        Category category = EASY_RANDOM.nextObject(Category.class);
 
-    //     doReturn(Optional.of(category))
-    //         .when(categoryRepository).searchById(detailInput.getCategoryId());
+        when(categoryRepository.searchById(detailInput.getCategoryId()))
+            .thenReturn(Optional.of(category));
 
-    //     expenseDetail.setCategory(category);
+        expenseDetail.setCategory(category);
 
-    //     when(expenseDetailRepository.save(expenseDetail))
-    //         .thenReturn(expenseDetail);
+        when(expenseDetailRepository.save(expenseDetail))
+            .thenReturn(expenseDetail);
 
-    //     var result = expenseDetailService.updateExpenseDetail(username, id, detailInput);
+        var result = expenseDetailService.updateExpenseDetail(username, id, detailInput);
 
-    //     assertEquals(expenseDetail, result);
-    // }
+        assertEquals(expenseDetail, result);
+    }
 
     @Test
     void updateException_Test() {
