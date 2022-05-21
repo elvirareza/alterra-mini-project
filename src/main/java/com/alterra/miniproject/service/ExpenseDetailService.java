@@ -2,8 +2,6 @@ package com.alterra.miniproject.service;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.alterra.miniproject.domain.common.ExpenseDetailInput;
 import com.alterra.miniproject.domain.model.Category;
 import com.alterra.miniproject.domain.model.Expense;
@@ -11,7 +9,6 @@ import com.alterra.miniproject.domain.model.ExpenseDetail;
 import com.alterra.miniproject.repository.CategoryRepository;
 import com.alterra.miniproject.repository.ExpenseDetailRepository;
 import com.alterra.miniproject.repository.ExpenseRepository;
-import com.alterra.miniproject.security.JwtTokenProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,12 +30,8 @@ public class ExpenseDetailService {
 
     @Autowired
     private CategoryRepository categoryRepository;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
     
-    public List<ExpenseDetail> getExpenseDetail(HttpServletRequest request) {
-        String username = getUsername(request);
+    public List<ExpenseDetail> getExpenseDetail(String username) {
         List<ExpenseDetail> expenseDetails = expenseDetailRepository.getExpenseDetailsByUsername(username);
 
         log.info("Get expense details success");
@@ -46,9 +39,8 @@ public class ExpenseDetailService {
         return expenseDetails;
     }
 
-    public ExpenseDetail getExpenseDetail(HttpServletRequest request, Long id) {
+    public ExpenseDetail getExpenseDetail(String username, Long id) {
         try {
-            String username = getUsername(request);
             ExpenseDetail expenseDetail = expenseDetailRepository.getExpenseDetailByUsername(id, username)
                 .orElseThrow(() -> new Exception("Expense detail with id " + id + " not found"));
             log.info("Get expense detail by id success");
@@ -60,23 +52,21 @@ public class ExpenseDetailService {
         }
     }
 
-    public ExpenseDetail postExpenseDetail(HttpServletRequest request, ExpenseDetailInput detailInput) {
+    public ExpenseDetail postExpenseDetail(String username, ExpenseDetailInput detailInput) {
         try {
             ExpenseDetail exp = new ExpenseDetail();
             exp.setName(detailInput.getName());
             exp.setAmount(detailInput.getAmount());
 
-            Expense expense = expenseRepository.getExpenseByUsername(detailInput.getExpenseId(), getUsername(request))
+            Expense expense = expenseRepository.getExpenseByUsername(detailInput.getExpenseId(), username)
                 .orElseThrow(() -> new Exception("Expense with id " + detailInput.getExpenseId() + " not found"));
 
             exp.setExpense(expense);
+            
+            Category category = categoryRepository.searchById(detailInput.getCategoryId())
+                .orElseThrow(() -> new Exception("Category with id " + detailInput.getCategoryId() + " not found"));
 
-            if(detailInput.getCategoryId() != null) {
-                Category category = categoryRepository.searchById(detailInput.getCategoryId())
-                    .orElseThrow(() -> new Exception("Category with id " + detailInput.getCategoryId() + " not found"));
-
-                exp.setCategory(category);
-            }
+            exp.setCategory(category);
             
             expenseDetailRepository.save(exp);
             log.info("Expense detail saved");
@@ -92,39 +82,30 @@ public class ExpenseDetailService {
         }
     }
 
-    public ExpenseDetail updateExpenseDetail(HttpServletRequest request, Long id, ExpenseDetailInput detailInput) {
+    public ExpenseDetail updateExpenseDetail(String username, Long id, ExpenseDetailInput detailInput) {
         try {
-            ExpenseDetail exp = getExpenseDetail(request, id);
+            ExpenseDetail exp = expenseDetailRepository.getExpenseDetailByUsername(id, username)
+                .orElseThrow(() -> new Exception("Expense detail with id " + id + " not found"));
 
-            if(!getUsername(request).equals(exp.getExpense().getUser().getUsername())) throw new Exception();
+            if(!username.equals(exp.getExpense().getUser().getUsername())) throw new Exception();
 
-            if(detailInput.getName() != null) exp.setName(detailInput.getName());
+            exp.setName(detailInput.getName());
 
-            if(detailInput.getExpenseId() != null) {
-                Expense expense = expenseRepository.getExpenseByUsername(detailInput.getExpenseId(), getUsername(request))
-                    .orElseThrow(() -> new Exception("Expense with id " + detailInput.getExpenseId() + " not found"));
+            Expense expense = expenseRepository.getExpenseByUsername(detailInput.getExpenseId(), username)
+                .orElseThrow(() -> new Exception("Expense with id " + detailInput.getExpenseId() + " not found"));
 
-                if(expense == null) throw new Exception();
-
-                exp.setExpense(expense);
-            } 
+            exp.setExpense(expense);
             
-            if(detailInput.getAmount() != null) {
-                Double totalAmount = expenseRepository.getTotalAmount(exp.getExpense().getId());
-                totalAmount -= exp.getAmount();
-                totalAmount += detailInput.getAmount();
-                expenseRepository.updateTotalAmount(exp.getExpense().getId(), totalAmount);
-                exp.setAmount(detailInput.getAmount());
-            }
+            Double totalAmount = expenseRepository.getTotalAmount(exp.getExpense().getId());
+            totalAmount -= exp.getAmount();
+            totalAmount += detailInput.getAmount();
+            expenseRepository.updateTotalAmount(exp.getExpense().getId(), totalAmount);
+            exp.setAmount(detailInput.getAmount());
 
-            if(detailInput.getCategoryId() != null) {
-                Category category = categoryRepository.searchById(detailInput.getCategoryId())
-                    .orElseThrow(() -> new Exception("Category with id " + detailInput.getCategoryId() + " not found"));
+            Category category = categoryRepository.searchById(detailInput.getCategoryId())
+                .orElseThrow(() -> new Exception("Category with id " + detailInput.getCategoryId() + " not found"));
 
-                exp.setCategory(category);
-            }else {
-               detailInput.setCategoryId(exp.getCategory().getId());
-            }
+            exp.setCategory(category);
             
             expenseDetailRepository.save(exp);
             log.info("Expense detail updated");
@@ -136,11 +117,12 @@ public class ExpenseDetailService {
         }
     }
 
-    public void deleteExpenseDetail(HttpServletRequest request, Long id) {
+    public void deleteExpenseDetail(String username, Long id) {
         try {
-            ExpenseDetail exp = getExpenseDetail(request, id);
+            ExpenseDetail exp = expenseDetailRepository.getExpenseDetailByUsername(id, username)
+                .orElseThrow(() -> new Exception("Expense detail with id " + id + " not found"));
 
-            if(!getUsername(request).equals(exp.getExpense().getUser().getUsername())) throw new Exception();
+            if(!username.equals(exp.getExpense().getUser().getUsername())) throw new Exception();
 
             expenseDetailRepository.deleteById(id);
             log.info("Expense detail deleted");
@@ -148,13 +130,5 @@ public class ExpenseDetailService {
             log.error("Delete expense detail error: {}", e.getMessage());
             throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    private String getUsername(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        String token = bearerToken.substring(7);
-        String username = jwtTokenProvider.getUsername(token);
-
-        return username;
     }
 }
