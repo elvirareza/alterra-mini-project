@@ -104,6 +104,7 @@
 						<exclude>**/domain/**/*.class</exclude>
 						<exclude>**/repository/*.class</exclude>
 						<exclude>**/security/*.class</exclude>
+						<exclude>**/service/AuthService.class</exclude>
 						<exclude>**/util/*.class</exclude>
 					</excludes>
 				</configuration>
