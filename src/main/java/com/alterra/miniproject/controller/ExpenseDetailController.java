@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.alterra.miniproject.domain.common.ExpenseDetailInput;
 import com.alterra.miniproject.domain.model.ExpenseDetail;
+import com.alterra.miniproject.security.JwtTokenProvider;
 import com.alterra.miniproject.service.ExpenseDetailService;
 import com.alterra.miniproject.util.ResponseUtil;
 
@@ -25,13 +26,18 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class ExpenseDetailController {
+    private String username;
     @Autowired
     private ExpenseDetailService expenseDetailService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/expense-detail")
     public ResponseEntity<?> getExpenseDetail(HttpServletRequest request) {
         try {
-            List<ExpenseDetail> expenseDetail = expenseDetailService.getExpenseDetail(request);
+            username = getUsername(request);
+            List<ExpenseDetail> expenseDetail = expenseDetailService.getExpenseDetail(username);
             return ResponseUtil.build("Get all expense detail", expenseDetail, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -41,7 +47,8 @@ public class ExpenseDetailController {
     @GetMapping("/expense-detail/{id}")
     public ResponseEntity<?> getExpenseDetail(HttpServletRequest request, @PathVariable("id") Long id) {
         try {
-            ExpenseDetail expenseDetail = expenseDetailService.getExpenseDetail(request, id);
+            username = getUsername(request);
+            ExpenseDetail expenseDetail = expenseDetailService.getExpenseDetail(username, id);
             return ResponseUtil.build("Get expense detail by id", expenseDetail, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -51,7 +58,8 @@ public class ExpenseDetailController {
     @PostMapping("/expense-detail")
     public ResponseEntity<?> postExpenseDetail (HttpServletRequest request, @RequestBody ExpenseDetailInput req) {
         try {
-            ExpenseDetail expenseDetail = expenseDetailService.postExpenseDetail(request, req);
+            username = getUsername(request);
+            ExpenseDetail expenseDetail = expenseDetailService.postExpenseDetail(username, req);
             return ResponseUtil.build("Expense detail saved", expenseDetail, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -61,7 +69,8 @@ public class ExpenseDetailController {
     @PutMapping("/expense-detail/{id}")
     public ResponseEntity<?> putExpenseDetail (HttpServletRequest request, @PathVariable("id") Long id, @RequestBody ExpenseDetailInput req) {
         try {
-            ExpenseDetail expenseDetail = expenseDetailService.updateExpenseDetail(request, id, req);
+            username = getUsername(request);
+            ExpenseDetail expenseDetail = expenseDetailService.updateExpenseDetail(username, id, req);
             return ResponseUtil.build("Expense detail saved", expenseDetail, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -71,10 +80,17 @@ public class ExpenseDetailController {
     @DeleteMapping("/expense-detail/{id}")
     public ResponseEntity<?> deleteExpenseDetail(HttpServletRequest request, @PathVariable("id") Long id) {
         try {
-            expenseDetailService.deleteExpenseDetail(request, id);
+            username = getUsername(request);
+            expenseDetailService.deleteExpenseDetail(username, id);
             return ResponseUtil.build("Expense detail deleted", null, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String getUsername(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        String token = bearerToken.substring(7);
+        return jwtTokenProvider.getUsername(token);
     }
 }
