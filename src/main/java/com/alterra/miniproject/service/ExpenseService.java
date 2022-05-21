@@ -3,8 +3,6 @@ package com.alterra.miniproject.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.alterra.miniproject.domain.common.ExpenseInput;
 import com.alterra.miniproject.domain.model.Expense;
 import com.alterra.miniproject.domain.model.Payment;
@@ -13,7 +11,6 @@ import com.alterra.miniproject.repository.ExpenseDetailRepository;
 import com.alterra.miniproject.repository.ExpenseRepository;
 import com.alterra.miniproject.repository.PaymentRepository;
 import com.alterra.miniproject.repository.UserRepository;
-import com.alterra.miniproject.security.JwtTokenProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,11 +36,7 @@ public class ExpenseService {
     @Autowired
     private ExpenseDetailRepository expenseDetailRepository;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    public List<Expense> getExpense(HttpServletRequest request) {
-        String username = getUsername(request);
+    public List<Expense> getExpense(String username) {
         List<Expense> expense = expenseRepository.getExpensesByUsername(username);
 
         log.info("Get expenses success");
@@ -51,10 +44,8 @@ public class ExpenseService {
         return expense;
     }
 
-    public Expense getExpense(HttpServletRequest request, Long id) {
+    public Expense getExpense(String username, Long id) {
         try {
-            String username = getUsername(request);
-
             Expense expense = expenseRepository.getExpenseByUsername(id, username)
                 .orElseThrow(() -> new Exception("Expense with id " + id + " not found"));
             log.info("Get expense by id success");            
@@ -66,24 +57,22 @@ public class ExpenseService {
         }
     }
 
-    public Expense postExpense(HttpServletRequest request, ExpenseInput expense) {
+    public Expense postExpense(String username, ExpenseInput expense) {
         try {
             Expense exp = new Expense();
 
             exp.setName(expense.getName());
             exp.setExpenseDate(LocalDateTime.now());  
 
-            User user = userRepository.findByUsername(getUsername(request));
+            User user = userRepository.findByUsername(username);
 
             exp.setUser(user);
 
-            if(expense.getPaymentId() != null) {
-                Payment payment = paymentRepository.searchById(expense.getPaymentId())
-                    .orElseThrow(() -> new Exception("Payment with id " + expense.getPaymentId() + " not found"));
+            Payment payment = paymentRepository.searchById(expense.getPaymentId())
+                .orElseThrow(() -> new Exception("Payment with id " + expense.getPaymentId() + " not found"));
 
-                exp.setPayment(payment);
-            }         
-
+            exp.setPayment(payment);
+            
             expenseRepository.save(exp);
             log.info("Expense saved");
 
@@ -94,20 +83,19 @@ public class ExpenseService {
         }
     }
 
-    public Expense updateExpense(HttpServletRequest request, Long id, ExpenseInput expense) {
+    public Expense updateExpense(String username, Long id, ExpenseInput expense) {
         try {
-            Expense exp = getExpense(request, id);
+            Expense exp = expenseRepository.getExpenseByUsername(id, username)
+                .orElseThrow(() -> new Exception("Expense with id " + id + " not found"));
 
-            if(!getUsername(request).equals(exp.getUser().getUsername())) throw new Exception();
+            if(!username.equals(exp.getUser().getUsername())) throw new Exception();
 
-            if(expense.getName() != null) exp.setName(expense.getName());
+            exp.setName(expense.getName());
 
-            if(expense.getPaymentId() != null) {
-                Payment payment = paymentRepository.searchById(expense.getPaymentId())
-                    .orElseThrow(() -> new Exception("Payment with id " + expense.getPaymentId() + " not found"));
+            Payment payment = paymentRepository.searchById(expense.getPaymentId())
+                .orElseThrow(() -> new Exception("Payment with id " + expense.getPaymentId() + " not found"));
 
-                exp.setPayment(payment);
-            } 
+            exp.setPayment(payment);
 
             expenseRepository.save(exp);
             log.info("Expense updated");
@@ -119,11 +107,12 @@ public class ExpenseService {
         }
     }
 
-    public void deleteExpense(HttpServletRequest request, Long id) {
+    public void deleteExpense(String username, Long id) {
         try {
-            Expense exp = getExpense(request, id);
+            Expense exp = expenseRepository.getExpenseByUsername(id, username)
+                .orElseThrow(() -> new Exception("Expense with id " + id + " not found"));
 
-            if(!getUsername(request).equals(exp.getUser().getUsername())) throw new Exception();
+            if(!username.equals(exp.getUser().getUsername())) throw new Exception();
 
             expenseRepository.deleteById(id);
             expenseDetailRepository.deleteExpenseDetailByExpense(id);
@@ -132,13 +121,5 @@ public class ExpenseService {
             log.error("Delete expense error: {}", e.getMessage());
             throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    private String getUsername(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        String token = bearerToken.substring(7);
-        String username = jwtTokenProvider.getUsername(token);
-
-        return username;
     }
 }

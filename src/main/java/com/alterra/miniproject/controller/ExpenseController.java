@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.alterra.miniproject.domain.common.ExpenseInput;
 import com.alterra.miniproject.domain.model.Expense;
+import com.alterra.miniproject.security.JwtTokenProvider;
 import com.alterra.miniproject.service.ExpenseService;
 import com.alterra.miniproject.util.ResponseUtil;
 
@@ -25,13 +26,18 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class ExpenseController {
+    private String username;
     @Autowired
     private ExpenseService expenseService;
+    
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/expense")
     public ResponseEntity<?> getExpense(HttpServletRequest request) {
         try {
-            List<Expense> expense = expenseService.getExpense(request);
+            username = getUsername(request);
+            List<Expense> expense = expenseService.getExpense(username);
             return ResponseUtil.build("Get all expense", expense, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -41,7 +47,8 @@ public class ExpenseController {
     @GetMapping("/expense/{id}")
     public ResponseEntity<?> getExpense(HttpServletRequest request, @PathVariable("id") Long id) {
         try {
-            Expense expense = expenseService.getExpense(request, id);
+            username = getUsername(request);
+            Expense expense = expenseService.getExpense(username, id);
             return ResponseUtil.build("Get expense by id", expense, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -51,7 +58,8 @@ public class ExpenseController {
     @PostMapping("/expense")
     public ResponseEntity<?> postExpense (HttpServletRequest request, @RequestBody ExpenseInput req) {
         try {
-            Expense expense = expenseService.postExpense(request, req);
+            username = getUsername(request);
+            Expense expense = expenseService.postExpense(username, req);
             return ResponseUtil.build("Expense saved", expense, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -61,7 +69,8 @@ public class ExpenseController {
     @PutMapping("/expense/{id}")
     public ResponseEntity<?> putExpense(HttpServletRequest request, @PathVariable("id") Long id, @RequestBody ExpenseInput req) {
         try {
-            Expense expense = expenseService.updateExpense(request, id, req);
+            username = getUsername(request);
+            Expense expense = expenseService.updateExpense(username, id, req);
             return ResponseUtil.build("Expense updated", expense, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -71,10 +80,17 @@ public class ExpenseController {
     @DeleteMapping("/expense/{id}")
     public ResponseEntity<?> deleteExpense(HttpServletRequest request, @PathVariable("id") Long id) {
         try {
-            expenseService.deleteExpense(request, id);
+            username = getUsername(request);
+            expenseService.deleteExpense(username, id);
             return ResponseUtil.build("Expense deleted", null, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String getUsername(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        String token = bearerToken.substring(7);
+        return jwtTokenProvider.getUsername(token);
     }
 }
